@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kids Learning and Game App</title>
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Comic Neue', cursive;
+        background: #FFF8DC;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+    }
+    .tab {
+        overflow: hidden;
+        background-color: #FFD700;
+    }
+    .tab button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+        font-size: 17px;
+        color: #8B4513;
+    }
+    .tab button:hover {
+        background-color: #FFA500;
+    }
+    .tab button.active {
+        background-color: #FF8C00;
+    }
+    .tabcontent {
+        display: none;
+        padding: 6px 12px;
+        border-top: none;
+        animation: fadeEffect 1s;
+    }
+    @keyframes fadeEffect {
+        from {opacity: 0;}
+        to {opacity: 1;}
+    }
+    .category {
+        display: inline-block;
+        margin: 10px;
+        cursor: pointer;
+        background: #FF6347;
+        padding: 10px;
+        border-radius: 10px;
+        color: white;
+    }
+    .card {
+        margin: 10px;
+        padding: 10px;
+        background: #98FB98;
+        border-radius: 8px;
+        display: inline-block;
+        width: 150px;
+    }
+    .card img {
+        max-width: 100%;
+        height: auto;
+    }
+    .audioBtn {
+        background: #4682B4;
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        margin-top: 5px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+    .navBtn {
+        font-size: 20px;
+        margin: 10px;
+        cursor: pointer;
+    }
+    #gameArea {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .gameCard {
+        margin: 10px;
+        padding: 20px;
+        background: #DDA0DD;
+        cursor: pointer;
+        font-size: 2em;
+    }
+    .star {
+        font-size: 2em;
+        margin: 5px;
+    }
+</style>
+</head>
+<body>
+
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, 'Flashcards')">Flashcards</button>
+  <button class="tablinks" onclick="openTab(event, 'Game')">Game</button>
+</div>
+
+<div id="Flashcards" class="tabcontent">
+  <h3>Choose a Category</h3>
+  <div id="categories"></div>
+  <div id="flashcardDisplay">
+    <button id="prev" class="navBtn">←</button>
+    <div id="cardContainer"></div>
+    <button id="next" class="navBtn">→</button>
+  </div>
+</div>
+
+<div id="Game" class="tabcontent">
+  <h3>Matching Game</h3>
+  <div id="gameArea"></div>
+  <div id="stars"></div>
+</div>
+
+<script>
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+
+document.getElementById('Flashcards').style.display = "block"; // Default tab
+
+// Flashcards Data
+const categories = {
+    'Fruits': ['apple', 'banana', 'cherry'],
+    'Vegetables': ['carrot', 'broccoli', 'pea'],
+    'Colors': ['red', 'blue', 'green'],
+    'Vehicles': ['car', 'bike', 'bus']
+};
+
+const cardData = {
+    apple: {img: 'apple.png', sound: 'apple.mp3'},
+    banana: {img: 'banana.png', sound: 'banana.mp3'},
+    cherry: {img: 'cherry.png', sound: 'cherry.mp3'},
+    // Add more items as needed
+};
+
+let currentCategory = '';
+let currentIndex = 0;
+
+function setupFlashcards() {
+    const categoryDiv = document.getElementById('categories');
+    for(let cat in categories) {
+        let div = document.createElement('div');
+        div.className = 'category';
+        div.textContent = cat;
+        div.onclick = () => showCategory(cat);
+        categoryDiv.appendChild(div);
+    }
+}
+
+function showCategory(category) {
+    currentCategory = category;
+    currentIndex = 0;
+    displayCard();
+}
+
+function displayCard() {
+    const container = document.getElementById('cardContainer');
+    container.innerHTML = '';
+    if(categories[currentCategory]) {
+        const item = categories[currentCategory][currentIndex];
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<img src="${cardData[item].img}" alt="${item}"><br>
+        <button class="audioBtn" onclick="playSound('${cardData[item].sound}')">Listen</button>`;
+        container.appendChild(card);
+    }
+}
+
+function playSound(src) {
+    new Audio(src).play();
+}
+
+document.getElementById('prev').onclick = function() {
+    if(currentIndex > 0) {
+        currentIndex--;
+        displayCard();
+    }
+};
+
+document.getElementById('next').onclick = function() {
+    if(currentIndex < categories[currentCategory].length - 1) {
+        currentIndex++;
+        displayCard();
+    }
+};
+
+// Game Logic
+function setupGame() {
+    const letters = 'abcdefghijklmnopqrstuvwxyz';
+    let gameCards = [...letters, ...letters.toUpperCase()].sort(() => Math.random() - 0.5);
+    const gameArea = document.getElementById('gameArea');
+    gameArea.innerHTML = '';
+    gameCards.forEach(letter => {
+        let card = document.createElement('div');
+        card.className = 'gameCard';
+        card.textContent = letter;
+        card.onclick = () => checkMatch(card, letter);
+        gameArea.appendChild(card);
+    });
+}
+
+let lastCard = null;
+let correctMatches = 0;
+
+function checkMatch(card, letter) {
+    if (!lastCard) {
+        lastCard = {card, letter};
+        card.style.backgroundColor = '#ADD8E6';
+    } else {
+        if (lastCard.letter.toLowerCase() === letter.toLowerCase() && lastCard.letter !== letter) {
+            card.style.backgroundColor = '#90EE90';
+            lastCard.card.style.backgroundColor = '#90EE90';
+            correctMatches++;
+            addStar(true);
+        } else {
+            card.style.backgroundColor = '#FFB6C1';
+            lastCard.card.style.backgroundColor = '#FFB6C1';
+            addStar(false);
+        }
+        lastCard = null;
+        setTimeout(() => {
+            if (correctMatches >= 5) {
+                alert('Congratulations! You matched more than 5 pairs correctly!');
+                location.reload();
+            }
+        }, 500);
+    }
+}
+
+function addStar(isCorrect) {
+    const starsDiv = document.getElementById('stars');
+    const star = document.createElement('span');
+    star.className = 'star';
+    star.textContent = isCorrect ? '⭐' : '❌';
+    starsDiv.appendChild(star);
+}
+
+setupFlashcards();
+setupGame();
+</script>
+
+</body>
+</html>
